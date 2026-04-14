@@ -18,6 +18,23 @@ class NotificationCenter extends Component
     public string $customMessage = '';
     public bool $useCustom = false;
 
+    public function updatedSelectedClientId(): void
+    {
+        $this->selectedSubscriptionId = 0;
+    }
+
+    public function getSubscriptionsProperty()
+    {
+        if (!$this->selectedClientId) {
+            return collect();
+        }
+
+        return AccountClient::with('account.streamingService')
+            ->where('client_id', $this->selectedClientId)
+            ->active()
+            ->get();
+    }
+
     public function render()
     {
         $logs = NotificationLog::with(['client', 'messageTemplate'])
