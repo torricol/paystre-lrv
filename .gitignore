@@ -21,6 +21,9 @@ public_html/hot
 storage/*.key
 /storage/pail
 .env
+.env.local
+.env.postgres
+.env.production
 Homestead.yaml
 Homestead.json
 /.vagrant
