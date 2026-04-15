@@ -25,6 +25,18 @@
                 </select>
             </div>
 
+            @if($selectedClientId && !$useCustom && $this->subscriptions->count())
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Suscripci&oacute;n</label>
+                <select wire:model.live="selectedSubscriptionId" class="w-full rounded-lg border-gray-300 text-sm">
+                    <option value="0">Seleccionar suscripci&oacute;n...</option>
+                    @foreach($this->subscriptions as $sub)
+                        <option value="{{ $sub->id }}">{{ $sub->account->streamingService->name }} - {{ $sub->account->label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
+
             <div>
                 <label class="flex items-center gap-2 mb-2">
                     <input wire:model.live="useCustom" type="checkbox" class="rounded border-gray-300 text-indigo-600">
