@@ -25,7 +25,6 @@
                 </select>
             </div>
 
-            @if($selectedClientId && !$useCustom && $this->subscriptions->count())
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Suscripci&oacute;n</label>
                 <select wire:model.live="selectedSubscriptionId" class="w-full rounded-lg border-gray-300 text-sm">
@@ -35,7 +34,6 @@
                     @endforeach
                 </select>
             </div>
-            @endif
 
             <div>
                 <label class="flex items-center gap-2 mb-2">
