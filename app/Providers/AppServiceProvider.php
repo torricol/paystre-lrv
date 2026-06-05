@@ -23,5 +23,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // 2. AÑADE ESTA LÍNEA AQUÍ
         Schema::defaultStringLength(191);
+        // Si la app está en producción (como en Railway), forzar HTTPS
+        if (config('app.env') === 'production' || app()->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
