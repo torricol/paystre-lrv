@@ -24,6 +24,9 @@ storage/*.key
 .env.local
 .env.postgres
 .env.production
+.env.railway
+.env.backup
+
 Homestead.yaml
 Homestead.json
 /.vagrant
@@ -31,10 +34,9 @@ Homestead.json
 
 
 
-.env.backup
-.env.production
 .phpactor.json
 auth.json
 
 .claude
 CLAUDE.md
+shared.bat
