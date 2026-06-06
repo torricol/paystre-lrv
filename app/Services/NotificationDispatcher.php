@@ -9,6 +9,7 @@ use App\Models\NotificationLog;
 use App\Services\Channels\ChannelInterface;
 use App\Services\Channels\TelegramSender;
 use App\Services\Channels\WhatsAppSender;
+use Illuminate\Support\Facades\Log;
 
 class NotificationDispatcher
 {
@@ -36,6 +37,11 @@ class NotificationDispatcher
             $recipient = $this->getRecipient($client, $channelName);
 
             if (!$recipient) {
+                Log::warning("Notificación fallida: cliente sin {$channelName} configurado", [
+                    'client_id' => $client->id,
+                    'client_name' => $client->name,
+                    'channel' => $channelName,
+                ]);
                 $results[] = $this->logNotification($client, $subscription, $template, $channelName, '', $message, 'failed', "Sin {$channelName} configurado para el cliente");
                 continue;
             }
@@ -66,6 +72,11 @@ class NotificationDispatcher
             $recipient = $this->getRecipient($client, $channelName);
 
             if (!$recipient) {
+                Log::warning("Notificación fallida: cliente sin {$channelName} configurado", [
+                    'client_id' => $client->id,
+                    'client_name' => $client->name,
+                    'channel' => $channelName,
+                ]);
                 $results[] = $this->logNotification($client, null, null, $channelName, '', $message, 'failed', "Sin {$channelName} configurado para el cliente");
                 continue;
             }

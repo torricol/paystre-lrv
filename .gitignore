@@ -1,5 +1,7 @@
 /vendor/
+/vendor_dev/
 node_modules/
+node_modules_dev/
 *.log
 
 # Laravel 4 specific
@@ -20,12 +22,7 @@ public_html/hot
 
 storage/*.key
 /storage/pail
-.env
-.env.local
-.env.postgres
-.env.production
-.env.railway
-.env.backup
+.env*
 
 Homestead.yaml
 Homestead.json
