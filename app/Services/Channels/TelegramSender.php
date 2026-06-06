@@ -4,6 +4,7 @@ namespace App\Services\Channels;
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TelegramSender implements ChannelInterface
 {
@@ -16,6 +17,7 @@ class TelegramSender implements ChannelInterface
 
         if (!$token) {
             $this->error = 'Token de bot de Telegram no configurado';
+            Log::error('Telegram: token de bot no configurado', ['recipient' => $recipient]);
             return false;
         }
 
@@ -30,6 +32,12 @@ class TelegramSender implements ChannelInterface
         }
 
         $this->error = $response->json('description', 'Error desconocido de Telegram');
+        Log::error('Telegram: fallo al enviar mensaje', [
+            'recipient'  => $recipient,
+            'error_code' => $response->json('error_code'),
+            'description' => $this->error,
+            'http_status' => $response->status(),
+        ]);
         return false;
     }
 
