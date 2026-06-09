@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Client;
+use App\Models\Payment;
 use Livewire\Component;
 
 class ClientManager extends Component
@@ -17,6 +18,7 @@ class ClientManager extends Component
     public bool $is_active = true;
     public string $notes = '';
     public string $search = '';
+    public ?int $viewingClientId = null;
 
     protected $rules = [
         'name' => 'required|string|max:150',
@@ -35,7 +37,20 @@ class ClientManager extends Component
             ->orderBy('name')
             ->get();
 
-        return view('livewire.client-manager', compact('clients'));
+        $clientPayments = null;
+        if ($this->viewingClientId) {
+            $clientPayments = Payment::with(['accountClient.account.streamingService'])
+                ->whereHas('accountClient', fn ($q) => $q->where('client_id', $this->viewingClientId))
+                ->orderBy('paid_at', 'desc')
+                ->get();
+        }
+
+        return view('livewire.client-manager', compact('clients', 'clientPayments'));
+    }
+
+    public function toggleClientPayments(int $clientId): void
+    {
+        $this->viewingClientId = $this->viewingClientId === $clientId ? null : $clientId;
     }
 
     public function create(): void

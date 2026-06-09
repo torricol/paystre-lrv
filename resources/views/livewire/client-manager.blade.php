@@ -88,10 +88,66 @@
                     </td>
                     <td class="px-4 py-3 text-center text-sm">{{ $client->active_subscriptions_count }}</td>
                     <td class="px-4 py-3 text-right">
+                        <button wire:click="toggleClientPayments({{ $client->id }})"
+                            class="text-xs {{ $viewingClientId === $client->id ? 'text-green-700 font-semibold' : 'text-green-600 hover:text-green-800' }} mr-2">
+                            Pagos
+                        </button>
                         <button wire:click="edit({{ $client->id }})" class="text-xs text-indigo-600 hover:text-indigo-800">Editar</button>
                         <button wire:click="delete({{ $client->id }})" wire:confirm="Eliminar {{ $client->name }}?" class="text-xs text-red-600 hover:text-red-800 ml-2">Eliminar</button>
                     </td>
                 </tr>
+                @if($viewingClientId === $client->id)
+                <tr class="bg-green-50">
+                    <td colspan="5" class="px-4 py-4">
+                        <div class="mb-2 flex items-center justify-between">
+                            <h4 class="font-semibold text-sm text-gray-700">Historial de pagos — {{ $client->name }}</h4>
+                            @if($clientPayments && $clientPayments->count() > 0)
+                                <span class="text-xs text-gray-500">
+                                    Total: <span class="font-semibold text-gray-700">{{ number_format($clientPayments->sum('amount'), 2) }} BOB</span>
+                                    ({{ $clientPayments->count() }} pagos)
+                                </span>
+                            @endif
+                        </div>
+                        @if($clientPayments && $clientPayments->count() > 0)
+                        <div class="overflow-x-auto rounded-lg border border-green-200">
+                            <table class="min-w-full divide-y divide-green-100 text-sm">
+                                <thead class="bg-green-100">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Servicio</th>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Período</th>
+                                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Monto</th>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Método</th>
+                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-green-100 bg-white">
+                                    @foreach($clientPayments as $payment)
+                                    <tr class="hover:bg-green-50">
+                                        <td class="px-3 py-2 text-gray-600 whitespace-nowrap">{{ $payment->paid_at->format('d/m/Y') }}</td>
+                                        <td class="px-3 py-2 text-gray-700">
+                                            <span class="inline-block w-2 h-2 rounded-full mr-1" style="background-color: {{ $payment->accountClient->account->streamingService->color ?? '#6366F1' }}"></span>
+                                            {{ $payment->accountClient->account->streamingService->name }}
+                                        </td>
+                                        <td class="px-3 py-2 text-gray-600 whitespace-nowrap">
+                                            {{ \Carbon\Carbon::create($payment->period_year, $payment->period_month)->translatedFormat('M Y') }}
+                                        </td>
+                                        <td class="px-3 py-2 text-right font-semibold whitespace-nowrap">{{ number_format($payment->amount, 2) }} {{ $payment->currency }}</td>
+                                        <td class="px-3 py-2 text-gray-500 hidden sm:table-cell">
+                                            {{ $payment->payment_method ? ucfirst($payment->payment_method) : '—' }}
+                                        </td>
+                                        <td class="px-3 py-2 text-gray-500 hidden lg:table-cell max-w-xs truncate">{{ $payment->notes ?? '—' }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @else
+                        <p class="text-sm text-gray-500 py-2">Este cliente no tiene pagos registrados.</p>
+                        @endif
+                    </td>
+                </tr>
+                @endif
                 @endforeach
             </tbody>
         </table>

@@ -25,7 +25,7 @@
     @if($showForm)
     <div class="bg-white rounded-lg shadow p-6 mb-6">
         <h3 class="text-lg font-semibold mb-4">
-            {{ $isAdvancePayment ? 'Pago Adelantado' : ($isFreeForm ? 'Nuevo Pago' : 'Registrar Pago') }}
+            {{ $editingPaymentId ? 'Editar Pago' : ($isAdvancePayment ? 'Pago Adelantado' : ($isFreeForm ? 'Nuevo Pago' : 'Registrar Pago')) }}
         </h3>
         <form wire:submit="save" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {{-- Selector de suscripcion (visible en formulario libre o cuando no hay suscripcion seleccionada) --}}
@@ -69,6 +69,7 @@
                         <option value="{{ $m }}">{{ \Carbon\Carbon::create(null, $m)->translatedFormat('F') }}</option>
                     @endfor
                 </select>
+                @error('period_month') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
@@ -96,9 +97,9 @@
             </div>
             <div class="sm:col-span-2 lg:col-span-3 flex gap-3">
                 <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
-                    {{ $isAdvancePayment ? 'Registrar Pago Adelantado' : 'Registrar Pago' }}
+                    {{ $editingPaymentId ? 'Actualizar Pago' : ($isAdvancePayment ? 'Registrar Pago Adelantado' : 'Registrar Pago') }}
                 </button>
-                <button type="button" wire:click="$set('showForm', false)" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">Cancelar</button>
+                <button type="button" wire:click="cancelForm" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">Cancelar</button>
             </div>
         </form>
     </div>
@@ -148,6 +149,7 @@
                         <div class="flex gap-1 justify-end items-center">
                             @if($sub->payment_status === 'paid' && $sub->current_payment)
                                 <span class="text-xs text-gray-500">{{ $sub->current_payment->paid_at->format('d/m') }}</span>
+                                <button wire:click="editPayment({{ $sub->current_payment->id }})" class="text-xs text-indigo-600 hover:text-indigo-800">Editar</button>
                                 <button wire:click="deletePayment({{ $sub->current_payment->id }})" wire:confirm="Eliminar este pago?" class="text-xs text-red-600 hover:text-red-800">Borrar</button>
                                 <span class="text-gray-300">|</span>
                             @else
