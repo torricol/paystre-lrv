@@ -13,6 +13,7 @@ class PaymentTracker extends Component
     public bool $showForm = false;
     public bool $isAdvancePayment = false;
     public bool $isFreeForm = false;
+    public ?int $editingPaymentId = null;
     public int $account_client_id = 0;
     public string $amount = '';
     public string $currency = 'BOB';
@@ -83,6 +84,29 @@ class PaymentTracker extends Component
         } else {
             $this->viewMonth++;
         }
+    }
+
+    public function editPayment(int $paymentId): void
+    {
+        $payment = Payment::findOrFail($paymentId);
+        $this->editingPaymentId = $paymentId;
+        $this->account_client_id = $payment->account_client_id;
+        $this->amount = $payment->amount;
+        $this->currency = $payment->currency;
+        $this->period_month = $payment->period_month;
+        $this->period_year = $payment->period_year;
+        $this->paid_at = $payment->paid_at->format('Y-m-d\TH:i');
+        $this->payment_method = $payment->payment_method ?? '';
+        $this->notes = $payment->notes ?? '';
+        $this->isAdvancePayment = false;
+        $this->isFreeForm = false;
+        $this->showForm = true;
+    }
+
+    public function cancelForm(): void
+    {
+        $this->showForm = false;
+        $this->editingPaymentId = null;
     }
 
     public function newPayment(int $subscriptionId = 0): void
@@ -176,6 +200,34 @@ class PaymentTracker extends Component
             'paid_at' => 'required|date',
             'payment_method' => 'nullable|string|max:50',
         ]);
+
+        if ($this->editingPaymentId) {
+            $conflict = Payment::where('account_client_id', $this->account_client_id)
+                ->where('period_month', $this->period_month)
+                ->where('period_year', $this->period_year)
+                ->where('id', '!=', $this->editingPaymentId)
+                ->exists();
+
+            if ($conflict) {
+                $this->addError('period_month', 'Ya existe un pago registrado para este período.');
+                return;
+            }
+
+            Payment::findOrFail($this->editingPaymentId)->update([
+                'amount' => $this->amount,
+                'currency' => $this->currency,
+                'period_month' => $this->period_month,
+                'period_year' => $this->period_year,
+                'paid_at' => $this->paid_at,
+                'payment_method' => $this->payment_method ?: null,
+                'notes' => $this->notes ?: null,
+            ]);
+
+            session()->flash('message', 'Pago actualizado.');
+            $this->editingPaymentId = null;
+            $this->showForm = false;
+            return;
+        }
 
         if ($this->isAdvancePayment && $this->advance_months > 1) {
             $sub = AccountClient::findOrFail($this->account_client_id);
